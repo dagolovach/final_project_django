@@ -76,7 +76,6 @@ def check_if_enrolled(user, course):
     return is_enrolled
 
 
-# CourseListView
 class CourseListView(generic.ListView):
     template_name = "onlinecourse/course_list_bootstrap.html"
     context_object_name = "course_list"
@@ -101,7 +100,6 @@ def enroll(request, course_id):
 
     is_enrolled = check_if_enrolled(user, course)
     if not is_enrolled and user.is_authenticated:
-        # Create an enrollment
         Enrollment.objects.create(user=user, course=course, mode="honor")
         course.total_enrollment += 1
         course.save()
@@ -112,27 +110,19 @@ def enroll(request, course_id):
 
 
 def submit(request, course_id):
-    # Get user and course object
+
     course = get_object_or_404(Course, pk=course_id)
-    print(course, course_id)
     user = request.user
-    print(user)
-    # ... then get the associated enrollment object created when the user enrolled the course
+
     enrollment = course = get_object_or_404(Enrollment, user=user, course=course)
-    print(enrollment)
-    # Create a submission object referring to the enrollment
+
     submission = Submission.objects.create(enrollment=enrollment)
-    print(submission)
 
-    # Collect the selected choices from exam form
     submitted_answers = extract_answers(request)
-    print(submitted_answers)
 
-    # Add each selected choice object to the submission object
     submission.choices.add(*submitted_answers)
     submission.save()
-    print(submission.choices.all())
-    # Redirect to show_exam_result with the submission id
+
     return HttpResponseRedirect(
         reverse(
             "onlinecourse:show_exam_result",
@@ -156,16 +146,13 @@ def extract_answers(request):
 
 
 def show_exam_result(request, course_id, submission_id):
-    # Get course and submission based on their ids
 
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
 
-    # Get the selected choice ids from the submission record
     submitted_choices = submission.choices.all()
     questions = course.question_set.all()
 
-    # Calculate the total score
     total = sum([q.grade for q in questions])
     achieved = 0
     for question in questions:
