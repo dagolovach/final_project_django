@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-# <HINT> Import any new Models here
+# <HINT> Import any new Models
 from .models import Course, Lesson, Instructor, Learner, Question, Choice, Submission
 
 
