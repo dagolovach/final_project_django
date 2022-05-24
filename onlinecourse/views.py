@@ -114,16 +114,24 @@ def enroll(request, course_id):
 def submit(request, course_id):
     # Get user and course object
     course = get_object_or_404(Course, pk=course_id)
+    print(course, course_id)
     user = request.user
+    print(user)
     # ... then get the associated enrollment object created when the user enrolled the course
     enrollment = course = get_object_or_404(Enrollment, user=user, course=course)
+    print(enrollment)
     # Create a submission object referring to the enrollment
     submission = Submission.objects.create(enrollment=enrollment)
+    print(submission)
+
     # Collect the selected choices from exam form
     submitted_answers = extract_answers(request)
+    print(submitted_answers)
+
     # Add each selected choice object to the submission object
     submission.choices.add(*submitted_answers)
     submission.save()
+    print(submission.choices.all())
     # Redirect to show_exam_result with the submission id
     return HttpResponseRedirect(
         reverse(
@@ -150,15 +158,11 @@ def extract_answers(request):
 def show_exam_result(request, course_id, submission_id):
     # Get course and submission based on their ids
 
-    print(request)
-    print(course_id)
-    print(submission_id)
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
 
     # Get the selected choice ids from the submission record
     submitted_choices = submission.choices.all()
-    print(submitted_choices)
     questions = course.question_set.all()
 
     # Calculate the total score
@@ -173,5 +177,5 @@ def show_exam_result(request, course_id, submission_id):
     context["course"] = course
     context["submitted_choices"] = submitted_choices
     context["grade"] = grade
-    print(context)
+
     return render(request, "onlinecourse/exam_result_bootstrap.html", context)
